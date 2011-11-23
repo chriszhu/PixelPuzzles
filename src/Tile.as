@@ -192,6 +192,14 @@ package
 			return image.overlapsPoint(point);
 		}
 		
+		public function isEqual(tile:Tile):Boolean {
+			if((tile.getPosition().x != getPosition().x) ||
+				(tile.getPosition().y != getPosition().y)) {
+				return false;
+			}
+			return true;
+		}
+		
 		public function updateImage():void {
 			//set image based on state and type
 			switch(state) {

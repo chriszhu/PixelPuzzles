@@ -68,6 +68,8 @@ package
 		
 		override public function update():void {
 			super.update();
+			//keep track of previousTile to detect changes
+			previousTile = currentTile;
 			//see if we just clicked on a tile
 			if(FlxG.mouse.justPressed()) {
 				//convert mouse coords to grid coords
@@ -78,17 +80,17 @@ package
 				//convert mouse coords to grid coords
 				currentTile = getTileAtPosition(new FlxPoint(FlxG.mouse.screenX, FlxG.mouse.screenY));
 				//see if the new tile is different than the previousTile
-				if(previousTile && currentTile && previousTile != currentTile) {
+				if(!currentTile.isEqual(previousTile)) {
+					//trace("changing tile to color: " + previousTile.getColor() + " at: " + currentTile.getPosition().toString() + " from: " + previousTile.getPosition().toString());
 					//change color of new tile to previousTile
 					currentTile.setColor(previousTile.getColor());
+					currentTile.setState(Tile.kStateFilled);
+					currentTile.setType(Tile.kTypeSingle);
 					//add child to previousTile and currentTile
-					previousTile.addChild(currentTile.getPosition());
-					currentTile.addChild(previousTile.getPosition());
+					//previousTile.addChild(currentTile.getPosition());
+					//currentTile.addChild(previousTile.getPosition());
 				}
 			}
-			
-			//keep track of previousTile to detect changes
-			previousTile = currentTile;
 		}
 		
 		public function getTileAtPosition(point:FlxPoint):Tile {
@@ -98,7 +100,7 @@ package
 					return tiles.members[i];
 				}
 			}
-			return null;
+			return currentTile;
 		}
 	}
 }
