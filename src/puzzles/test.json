@@ -2,6 +2,7 @@
 	"puzzle": {
 		"width": 21,
 		"height": 7,
+		"tileSize": { "width": 32, "height": 32 },
 		"tiles": [
 			{ "node": true, "id": 0, "color": "0x00ff00", "length": 5 },
 			{ "node": false, "id": 0, "color": "0x00ff00", "length": 5 },

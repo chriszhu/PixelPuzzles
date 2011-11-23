@@ -142,6 +142,9 @@ package
 			size = newSize;
 			//update displayLength's width based on newSize
 			displayLength.width = newSize.x;
+			//update image's width and height based on newSize
+			image.width = newSize.x;
+			image.height = newSize.y;
 		}
 		
 		//getters

@@ -37,7 +37,7 @@ package
 			puzzleLoader.loadPuzzle("puzzles/test.json", this.positionTiles);
 		}
 		
-		public function positionTiles(width:int, height:int, jsonTiles:Array):void {
+		public function positionTiles(width:int, height:int, tileWidth:int, tileHeight:int, jsonTiles:Array):void {
 			//counter for incrementing through jsonTiles
 			var tileCounter:int = 0;
 			//loop through and create tiles based on width and height
@@ -46,6 +46,7 @@ package
 					//create new tile
 					var t:Tile = tiles.recycle() as Tile;
 					//set variables based on json information
+					t.setSize(new FlxPoint(tileWidth, tileHeight));
 					t.setState(Tile.kStateUnfilled);
 					t.setPosition(new FlxPoint(j, i));
 					t.setIsEnd(jsonTiles[tileCounter].node);
@@ -67,24 +68,17 @@ package
 		
 		override public function update():void {
 			super.update();
-			//trace("mouse position: " + FlxG.mouse.screenX + " --- " + FlxG.mouse.screenY);
 			//see if we just clicked on a tile
 			if(FlxG.mouse.justPressed()) {
-				trace("just pressed");
 				//convert mouse coords to grid coords
 				currentTile = getTileAtPosition(new FlxPoint(FlxG.mouse.screenX, FlxG.mouse.screenY));
 			}
 			//see if we are dragging over the grid
 			else if(FlxG.mouse.pressed()) {
-				trace("pressed");
 				//convert mouse coords to grid coords
 				currentTile = getTileAtPosition(new FlxPoint(FlxG.mouse.screenX, FlxG.mouse.screenY));
-				if(currentTile && previousTile) {
-					trace("current tile position: " + currentTile.getPosition().toString() + " --- previous: " + previousTile.getPosition().toString());
-				}
 				//see if the new tile is different than the previousTile
 				if(previousTile && currentTile && previousTile != currentTile) {
-					trace("different tiles!");
 					//change color of new tile to previousTile
 					currentTile.setColor(previousTile.getColor());
 					//add child to previousTile and currentTile

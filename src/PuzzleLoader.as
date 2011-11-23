@@ -24,7 +24,7 @@ package
 		public function finishLoadPuzzle(e:Event):void {
 			json = new JSONDecoder(e.target.data, false);
 			trace(json.getValue().puzzle.tiles.length);
-			callback(json.getValue().puzzle.width, json.getValue().puzzle.height, json.getValue().puzzle.tiles);
+			callback(json.getValue().puzzle.width, json.getValue().puzzle.height, json.getValue().puzzle.tileSize.width, json.getValue().puzzle.tileSize.height, json.getValue().puzzle.tiles);
 		}
 	}
 }
