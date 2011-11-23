@@ -52,150 +52,180 @@ package
 		public static const kTypeSingle:int = 10;
 		public static const kTypeCount:int = 11;
 		
-		//the line that this tile is currently a part of
-		private var line:Line;
-		
-		private var enabled:Boolean = false;
-		private var selected:Boolean = false;
-		private var id:int = 0;
-		private var isNode:Boolean = false;
-		private var length:int = 0;
-		private var nodeLength:int = 0;
-		private var node:Tile;
+		//the image of the tile
+		private var image:FlxSprite;
+		//the text object that displays the endLength
 		private var displayLength:FlxText;
 		
+		//the line that this tile is currently a part of
+		private var line:Line;
+		//whether this tile is at the end of a line
+		private var isEnd:Boolean = false;
+		//the length of the line connecting this end to another end
+		private var endLength:int = 0;
+		//tiles this tile is connected to in a line. max of 2. min of 0.
 		private var children:Array = new Array();
-		
 		//current type of the tile
 		private var type:int;
 		//current state of the tile
 		private var state:int;
 		//position in grid of tiles (actual x position / width, actual y position / height)
-		private var position:FlxPoint;
-		
+		private var position:FlxPoint = new FlxPoint(0, 0);
 		//for easy looping
 		private var i:int, j:int;
+		//size of the tile
+		private var size:FlxPoint = new FlxPoint(32, 32);
 		
-		public function Tile(tileNumberGroup:FlxGroup)
+		public function Tile(defaultState:int=Tile.kStateUnknown, defaultType:int=Tile.kTypeUnknown)
 		{
-			super(0, 0);
-
-			state = Tile.kStateUnknown;
-			type = Tile.kTypeUnknown;
-			visible = false;
-			
+			//two FlxObjects in this class: image and displayLength
+			super(2);
+			//set initial state and type
+			state = defaultState;
+			type = defaultType;
+			//create image for tile
+			image = new FlxSprite(0, 0);
+			image.visible = false;
+			add(image);
 			//create display for text and add it to this tile's group
-			displayLength = new FlxText(0, 0, 32);
+			displayLength = new FlxText(0, 0, size.x);
 			displayLength.alignment = "center";
-			tileNumberGroup.add(displayLength);
+			add(displayLength);
 		}
 		
-		public function setIsNode(newNode:Boolean):void {
-			isNode = newNode;
+		//setters
+		public function setLine(newLine:Line):void {
+			line = newLine;
 		}
 		
-		public function getIsNode():Boolean {
-			return isNode;
+		public function setIsEnd(newIsEnd:Boolean):void {
+			isEnd = newIsEnd;
 		}
 		
-		public function setNode(newNode:Tile):void {
-			node = newNode;
+		public function setEndLength(newEndLength:int):void {
+			endLength = newEndLength;
 		}
 		
-		public function getNode():Tile {
-			return node;
-		}
-		
-		public function setNodeLength(newNodeLength:int):void {
-			nodeLength = newNodeLength;
-			setNode(this);
-			length = 1;
-		}
-		
-		public function getNodeLength():int {
-			return nodeLength;
-		}
-		
-		public function setDisplayLength(newDisplayLength:int):void {
-			//set display length text and position
-			displayLength.text = "" + nodeLength;
-			displayLength.x = this.x;
-			displayLength.y = this.y;
-		}
-		
-		public function setLength(newLength:int):void {
-			length = newLength;
-		}
-		
-		public function getLength():int {
-			return length;
-		}
-		
-		public function setID(newID:Number):void {
-			id = newID;
-		}
-		
-		public function getID():Number {
-			return id;
+		public function setChildren(newChildren:Array):void {
+			children = newChildren;
 		}
 		
 		public function setState(newState:int):void {
-			
 			state = newState;
 			updateImage();
 		}
 		
 		public function setType(newType:int):void {
-			
 			type = newType;
 			updateImage();
 		}
 		
 		public function setPosition(newPosition:FlxPoint):void {
 			position = newPosition;
+			//set image's position based on grid position and size of tile
+			image.x = size.x * position.x;
+			image.y = size.y * position.y;
+			//set displayLength's position based on grid position, size of tile, and size of font
+			displayLength.x = image.x;
+			displayLength.y = image.y + ((size.y * 0.5) - (displayLength.height * 0.5));
+		}
+		
+		public function setColor(newColor:uint):void {
+			image.color = newColor;
+		}
+		
+		public function setDisplayLength(newDisplayLength:int):void {
+			displayLength.text = "" + newDisplayLength;
+		}
+		
+		public function setSize(newSize:FlxPoint):void {
+			size = newSize;
+			//update displayLength's width based on newSize
+			displayLength.width = newSize.x;
+		}
+		
+		//getters
+		public function getLine():Line {
+			return line;
+		}
+		
+		public function getIsEnd():Boolean {
+			return isEnd;
+		}
+		
+		public function getEndLength():int {
+			return endLength;
+		}
+		
+		public function getChildren():Array {
+			return children;
+		}
+		
+		public function getState():int {
+			return state;
+		}
+		
+		public function getType():int {
+			return type;
 		}
 		
 		public function getPosition():FlxPoint {
 			return position;
 		}
 		
+		public function getColor():uint {
+			return image.color;
+		}
+		
+		public function getDisplayLength():int {
+			return int(displayLength.text);
+		}
+		
+		public function getSize():FlxPoint {
+			return size;
+		}
+		
+		public function overlapsPoint(point:FlxPoint):Boolean {
+			return image.overlapsPoint(point);
+		}
+		
 		public function updateImage():void {
-			
+			//set image based on state and type
 			switch(state) {
 				case Tile.kStateFilled:
 					switch(type) {
 						case Tile.kTypeTopToBottom:
-							loadGraphic(ImgFilledTopToBottom);
+							image.loadGraphic(ImgFilledTopToBottom);
 							break;
 						case Tile.kTypeTopToLeft:
-							loadGraphic(ImgFilledTopToLeft);
+							image.loadGraphic(ImgFilledTopToLeft);
 							break;
 						case Tile.kTypeTopToRight:
-							loadGraphic(ImgFilledTopToRight);
+							image.loadGraphic(ImgFilledTopToRight);
 							break;
 						case Tile.kTypeLeftToRight:
-							loadGraphic(ImgFilledLeftToRight);
+							image.loadGraphic(ImgFilledLeftToRight);
 							break;
 						case Tile.kTypeBottomToLeft:
-							loadGraphic(ImgFilledBottomToLeft);
+							image.loadGraphic(ImgFilledBottomToLeft);
 							break;
 						case Tile.kTypeBottomToRight:
-							loadGraphic(ImgFilledBottomToRight);
+							image.loadGraphic(ImgFilledBottomToRight);
 							break;
 						case Tile.kTypeLeftCap:
-							loadGraphic(ImgFilledLeftCap);
+							image.loadGraphic(ImgFilledLeftCap);
 							break;
 						case Tile.kTypeRightCap:
-							loadGraphic(ImgFilledRightCap);
+							image.loadGraphic(ImgFilledRightCap);
 							break;
 						case Tile.kTypeTopCap:
-							loadGraphic(ImgFilledTopCap);
+							image.loadGraphic(ImgFilledTopCap);
 							break;
 						case Tile.kTypeBottomCap:
-							loadGraphic(ImgFilledBottomCap);
+							image.loadGraphic(ImgFilledBottomCap);
 							break;
 						case Tile.kTypeSingle:
-							loadGraphic(ImgFilledSingle);
+							image.loadGraphic(ImgFilledSingle);
 							break;
 						default:
 							break;
@@ -204,37 +234,37 @@ package
 				case Tile.kStateUnfilled:
 					switch(type) {
 						case Tile.kTypeTopToBottom:
-							loadGraphic(ImgUnfilledTopToBottom);
+							image.loadGraphic(ImgUnfilledTopToBottom);
 							break;
 						case Tile.kTypeTopToLeft:
-							loadGraphic(ImgUnfilledTopToLeft);
+							image.loadGraphic(ImgUnfilledTopToLeft);
 							break;
 						case Tile.kTypeTopToRight:
-							loadGraphic(ImgUnfilledTopToRight);
+							image.loadGraphic(ImgUnfilledTopToRight);
 							break;
 						case Tile.kTypeLeftToRight:
-							loadGraphic(ImgUnfilledLeftToRight);
+							image.loadGraphic(ImgUnfilledLeftToRight);
 							break;
 						case Tile.kTypeBottomToLeft:
-							loadGraphic(ImgUnfilledBottomToLeft);
+							image.loadGraphic(ImgUnfilledBottomToLeft);
 							break;
 						case Tile.kTypeBottomToRight:
-							loadGraphic(ImgUnfilledBottomToRight);
+							image.loadGraphic(ImgUnfilledBottomToRight);
 							break;
 						case Tile.kTypeSingle:
-							loadGraphic(ImgUnfilledSingle);
+							image.loadGraphic(ImgUnfilledSingle);
 							break;
 						case Tile.kTypeLeftCap:
-							loadGraphic(ImgUnfilledLeftCap);
+							image.loadGraphic(ImgUnfilledLeftCap);
 							break;
 						case Tile.kTypeRightCap:
-							loadGraphic(ImgUnfilledRightCap);
+							image.loadGraphic(ImgUnfilledRightCap);
 							break;
 						case Tile.kTypeTopCap:
-							loadGraphic(ImgUnfilledTopCap);
+							image.loadGraphic(ImgUnfilledTopCap);
 							break;
 						case Tile.kTypeBottomCap:
-							loadGraphic(ImgUnfilledBottomCap);
+							image.loadGraphic(ImgUnfilledBottomCap);
 							break;
 						default:
 							break;
@@ -245,32 +275,11 @@ package
 			}
 			
 			if(state != Tile.kStateUnknown && type != Tile.kTypeUnknown) {
-				visible = true;
+				image.visible = true;
 			}
 			else {
-				visible = false;
+				image.visible = false;
 			}
-		}
-		
-		public function setEnabled(newEnabled:Boolean):void {
-			enabled = newEnabled;
-		}
-		
-		public function getEnabled():Boolean {
-			return enabled;
-		}
-		
-		public function setSelected(newSelected:Boolean):void {
-			selected = newSelected;
-			
-			if(selected)
-				scale = new FlxPoint(1.1, 1.1);
-			else
-				scale = new FlxPoint(1, 1);
-		}
-		
-		public function getSelected():Boolean {
-			return selected;
 		}
 		
 		public function childrenUpdated():void {
@@ -314,7 +323,7 @@ package
 				}
 			}
 			else {
-				if(isNode) {
+				if(isEnd) {
 					setType(Tile.kTypeSingle);
 				}
 				else {
@@ -346,10 +355,6 @@ package
 			}
 			
 			childrenUpdated();
-		}
-		
-		public function getChildren():Array {
-			return children;
 		}
 	}
 }

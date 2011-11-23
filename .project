@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+	<name>PixelPuzzles</name>
+	<comment></comment>
+	<projects>
+	</projects>
+	<buildSpec>
+		<buildCommand>
+			<name>com.adobe.flexbuilder.project.flexbuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+	</buildSpec>
+	<natures>
+		<nature>com.adobe.flexbuilder.project.actionscriptnature</nature>
+	</natures>
+	<linkedResources>
+		<link>
+			<name>[source path] flixel</name>
+			<type>2</type>
+			<location>/Users/kristianbauer/Documents/Actionscript Libraries/flixel</location>
+		</link>
+		<link>
+			<name>[source path] src</name>
+			<type>2</type>
+			<location>/Users/kristianbauer/Documents/Actionscript Libraries/as3corelib-.93/src</location>
+		</link>
+	</linkedResources>
+</projectDescription>
