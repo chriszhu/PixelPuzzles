@@ -21,6 +21,8 @@ package
 		//current and previous tile selected, used in update method
 		private var currentTile:Tile = null;
 		private var previousTile:Tile = null;
+		//array of lines that tiles belong to
+		private var lines:Array = new Array();
 		
 		override public function create():void {
 			//show mouse
@@ -80,17 +82,58 @@ package
 				//convert mouse coords to grid coords
 				currentTile = getTileAtPosition(new FlxPoint(FlxG.mouse.screenX, FlxG.mouse.screenY));
 				//see if the new tile is different than the previousTile
-				if(!currentTile.isEqual(previousTile)) {
-					//trace("changing tile to color: " + previousTile.getColor() + " at: " + currentTile.getPosition().toString() + " from: " + previousTile.getPosition().toString());
-					//change color of new tile to previousTile
-					currentTile.setColor(previousTile.getColor());
-					currentTile.setState(Tile.kStateFilled);
-					currentTile.setType(Tile.kTypeSingle);
-					//add child to previousTile and currentTile
-					//previousTile.addChild(currentTile.getPosition());
-					//currentTile.addChild(previousTile.getPosition());
+				if(currentTile && !currentTile.isEqual(previousTile)) {
+					//this tile is draggable if:
+					//	it is the last child of a pre-existing line OR
+					//	it is an end cap that is not part of a line
+					if(previousTile.getIsEnd() && !previousTile.getLine()) {
+						//create a new line, set some info about it, and add it to our array of lines to keep track of them
+						var l:Line = new Line();
+						l.setColor(previousTile.getColor());
+						l.setTargetLength(previousTile.getEndLength());
+						lines.push(l);
+						//add the previousTile as a child first
+						l.addChild(previousTile);
+						//then see if we can add the currentTile
+						if(l.canAddChild(currentTile)) {
+							l.addChild(currentTile);
+						}
+						//not a valid line anymore
+						else {
+							lines.pop().destroy();
+						}
+					}
+					else if(previousTile.getLine() && (previousTile.getLine().getLastChild() == previousTile || previousTile.getLine().getFirstChild() == previousTile)) {
+						//see if we can add the currentTile
+						if(previousTile.getLine().canAddChild(currentTile)) {
+							previousTile.getLine().addChild(currentTile);
+						}
+						//see if we can remove the currentTile
+						else if(currentTile.getLine() && currentTile.getLine().canRemoveChild(previousTile)) {
+							currentTile.getLine().removeChild();
+							//see if the line only has one child
+							if(currentTile.getLine().getLength() <= 1) {
+								//grab the index of the line and remove it if it exists
+								var lineIndex:int = getIndexOfLine(currentTile.getLine());
+								if(lineIndex >= 0) {
+									lines.splice(lineIndex, 1);
+									currentTile.getLine().destroy();
+								}
+							}
+						}
+					}
 				}
 			}
+		}
+		
+		public function getIndexOfLine(line:Line):int {
+			//loop through lines and find the given line
+			for(i=0, j=lines.length;i<j;i++) {
+				if(lines[i] == line) {
+					return i;
+				}
+			}
+			return -1;
 		}
 		
 		public function getTileAtPosition(point:FlxPoint):Tile {

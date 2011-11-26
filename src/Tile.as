@@ -343,21 +343,16 @@ package
 			}
 		}
 		
-		public function addChild(p:FlxPoint):void {
-			//see if we already have the new point as a child
-			for(i=0,j=children.length;i<j;i++) {
-				if(children[i].x == p.x && children[i].y == p.y) {
-					removeChild(p);
-					return;
-				}
-			}
-			
+		public function addChild(t:Tile):void {
+			//get offset from this tile's position
+			var p:FlxPoint = t.getPosition().subtract(getPosition());
 			children.push(p);
-			
 			childrenUpdated();
 		}
 		
-		public function removeChild(p:FlxPoint):void {
+		public function removeChild(t:Tile):void {
+			//get offset from this tile's position
+			var p:FlxPoint = t.getPosition().subtract(getPosition());
 			for(i=0,j=children.length;i<j;i++) {
 				if(children[i].x == p.x && children[i].y == p.y) {
 					children.splice(i, 1);
@@ -366,6 +361,12 @@ package
 			}
 			
 			childrenUpdated();
+		}
+		
+		//sets all the variables of this tile back to their initial state
+		public function reset():void {
+			setLine(null);
+			setState(Tile.kStateUnfilled);
 		}
 	}
 }
